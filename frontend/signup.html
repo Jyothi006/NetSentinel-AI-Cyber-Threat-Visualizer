@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NetSentinel - Registration Portal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="auth-page-container">
+
+    <div class="auth-card">
+        <div class="auth-header">
+            <h1>NETSENTINEL</h1>
+            <div class="auth-subtitle">Initialize Operator Profile</div>
+        </div>
+
+        <div id="status-alert" class="auth-alert">
+            <span id="status-message">Error: Registration unsuccessful.</span>
+        </div>
+
+        <form id="signup-form">
+            <div class="auth-form-group">
+                <label for="username">OPERATOR CODE / USERNAME</label>
+                <div class="auth-input-wrapper">
+                    <input type="text" id="username" name="username" class="auth-input" placeholder="Set username..." required autofocus autocomplete="off">
+                </div>
+            </div>
+
+            <div class="auth-form-group">
+                <label for="email">OPERATOR EMAIL</label>
+                <div class="auth-input-wrapper">
+                    <input type="email" id="email" name="email" class="auth-input" placeholder="Set email..." required autocomplete="off">
+                </div>
+            </div>
+
+            <div class="auth-form-group">
+                <label for="password">ACCESS KEY / PASSWORD</label>
+                <div class="auth-input-wrapper">
+                    <input type="password" id="password" name="password" class="auth-input" placeholder="Set password..." required autocomplete="off">
+                    <button type="button" id="toggle-password" class="password-toggle-btn">
+                        <span id="toggle-text">SHOW</span>
+                    </button>
+                </div>
+            </div>
+
+            <button type="submit" class="auth-submit-btn">
+                Register Operator
+            </button>
+        </form>
+
+        <div class="auth-footer">
+            Profile already exists? <a href="/login">Console Login</a>
+        </div>
+    </div>
+
+    <script>
+        // Password visibility toggler
+        const passwordInput = document.getElementById("password");
+        const togglePasswordBtn = document.getElementById("toggle-password");
+        const toggleText = document.getElementById("toggle-text");
+
+        togglePasswordBtn.addEventListener("click", () => {
+            if (passwordInput.type === "password") {
+                passwordInput.type = "text";
+                toggleText.innerText = "HIDE";
+            } else {
+                passwordInput.type = "password";
+                toggleText.innerText = "SHOW";
+            }
+        });
+
+        // Form Submission via AJAX
+        const signupForm = document.getElementById("signup-form");
+        const statusAlert = document.getElementById("status-alert");
+        const statusMessage = document.getElementById("status-message");
+
+        signupForm.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            statusAlert.style.display = "none";
+            statusAlert.classList.remove("success");
+
+            const username = document.getElementById("username").value;
+            const email = document.getElementById("email").value;
+            const password = passwordInput.value;
+
+            try {
+                const response = await fetch("/signup", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({ username, email, password })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    // Success alert
+                    statusMessage.textContent = "Profile Initialized! Redirecting to login portal...";
+                    statusAlert.classList.add("success");
+                    statusAlert.style.display = "flex";
+                    
+                    // Redirect after a brief delay so they see the success message
+                    setTimeout(() => {
+                        window.location.href = data.redirect || "/login";
+                    }, 1500);
+                } else {
+                    // Show error
+                    statusMessage.textContent = data.error || "Failed to create profile. Try again.";
+                    statusAlert.style.display = "flex";
+                }
+            } catch (err) {
+                statusMessage.textContent = "Connection reset: NetSentinel server offline.";
+                statusAlert.style.display = "flex";
+            }
+        });
+    </script>
+</body>
+</html>

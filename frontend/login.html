@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NetSentinel - Threat Intelligence Auth</title>
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="auth-page-container">
+
+    <div class="auth-card">
+        <div class="auth-header">
+            <h1>NETSENTINEL</h1>
+            <div class="auth-subtitle">Secure Access Control</div>
+        </div>
+
+        <div id="error-alert" class="auth-alert">
+            <span id="error-message">Access Denied: Invalid signature.</span>
+        </div>
+
+        <form id="login-form">
+            <div class="auth-form-group">
+                <label for="username">OPERATOR CODE / USERNAME</label>
+                <div class="auth-input-wrapper">
+                    <input type="text" id="username" name="username" class="auth-input" placeholder="Enter username..." required autofocus autocomplete="off">
+                </div>
+            </div>
+
+            <div class="auth-form-group">
+                <label for="password">ACCESS KEY / PASSWORD</label>
+                <div class="auth-input-wrapper">
+                    <input type="password" id="password" name="password" class="auth-input" placeholder="Enter password..." required autocomplete="off">
+                    <button type="button" id="toggle-password" class="password-toggle-btn">
+                        <span id="toggle-text">SHOW</span>
+                    </button>
+                </div>
+            </div>
+
+            <button type="submit" class="auth-submit-btn">
+                Establish Link
+            </button>
+        </form>
+
+        <div class="auth-footer">
+            No active profile? <a href="/signup">Initialize Profile</a>
+        </div>
+    </div>
+
+    <script>
+        // Password visibility toggler
+        const passwordInput = document.getElementById("password");
+        const togglePasswordBtn = document.getElementById("toggle-password");
+        const toggleText = document.getElementById("toggle-text");
+
+        togglePasswordBtn.addEventListener("click", () => {
+            if (passwordInput.type === "password") {
+                passwordInput.type = "text";
+                toggleText.innerText = "HIDE";
+            } else {
+                passwordInput.type = "password";
+                toggleText.innerText = "SHOW";
+            }
+        });
+
+        // Form Submission via AJAX
+        const loginForm = document.getElementById("login-form");
+        const errorAlert = document.getElementById("error-alert");
+        const errorMessage = document.getElementById("error-message");
+
+        loginForm.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            errorAlert.style.display = "none";
+
+            const username = document.getElementById("username").value;
+            const password = passwordInput.value;
+
+            try {
+                const response = await fetch("/login", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({ username, password })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    // Success! Redirect to the dashboard
+                    window.location.href = data.redirect || "/";
+                } else {
+                    // Show error
+                    errorMessage.textContent = data.error || "Authentication failed. Access Denied.";
+                    errorAlert.style.display = "flex";
+                }
+            } catch (err) {
+                errorMessage.textContent = "Connection reset: NetSentinel server offline.";
+                errorAlert.style.display = "flex";
+            }
+        });
+    </script>
+</body>
+</html>

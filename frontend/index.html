@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>NetSentinel - Network Security Monitor</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="style.css">
+
+<script src="https://d3js.org/d3.v7.min.js"></script>
+
+</head>
+
+<body>
+
+
+<header class="hud-header">
+
+<div class="logo-area">
+
+<div class="brand">
+
+<h1>NETSENTINEL</h1>
+
+<span class="sub-brand">
+NETWORK SECURITY MONITOR
+</span>
+
+</div>
+
+</div>
+
+
+<div class="system-status-container">
+
+<span class="hud-label">
+SYSTEM STATE:
+</span>
+
+
+<div id="status-badge" class="status-badge online">
+
+<span class="pulse-dot"></span>
+
+<span id="status-text">
+ACTIVE MONITORING
+</span>
+
+</div>
+
+</div>
+
+
+
+<div class="header-controls">
+
+<button id="toggle-sim-btn" class="hud-btn">
+
+PAUSE SIMULATION
+
+</button>
+
+
+<button id="clear-db-btn" class="hud-btn danger-btn">
+
+RESET DATABASE
+
+</button>
+
+
+<a href="/logout" id="logout-btn" class="hud-btn danger-btn" style="text-decoration: none;">
+LOGOUT
+</a>
+
+
+</div>
+
+
+</header>
+
+
+
+
+
+<main class="dashboard-grid">
+
+
+<section class="telemetry-row">
+
+
+<div class="metric-card">
+
+
+
+<div class="metric-info">
+
+<span class="metric-label">
+TOTAL PACKETS
+</span>
+
+<h2 id="val-total" class="metric-value">
+0
+</h2>
+
+</div>
+
+</div>
+
+
+
+
+<div class="metric-card">
+
+
+
+<div class="metric-info">
+
+<span class="metric-label">
+NORMAL TRAFFIC
+</span>
+
+
+<h2 id="val-normal" class="metric-value">
+0
+</h2>
+
+</div>
+
+</div>
+
+
+
+
+
+<div class="metric-card">
+
+
+
+<div class="metric-info">
+
+<span class="metric-label">
+THREATS DETECTED
+</span>
+
+
+<h2 id="val-threats" class="metric-value">
+0
+</h2>
+
+
+</div>
+
+</div>
+
+
+
+
+
+
+<div class="metric-card" id="card-risk">
+
+
+
+
+
+<div class="metric-info">
+
+<span class="metric-label">
+NETWORK RISK
+</span>
+
+
+<h2 id="val-risk" class="metric-value">
+0%
+</h2>
+
+
+</div>
+
+
+<div class="risk-bar-container">
+
+<div id="val-risk-bar" class="risk-bar">
+
+</div>
+
+</div>
+
+
+</div>
+
+
+</section>
+
+
+
+
+
+
+
+<div class="visualization-area">
+
+
+<section class="panel topology-panel">
+
+
+<div class="panel-header">
+
+
+<div class="panel-title">
+
+NETWORK TOPOLOGY MAP
+
+</div>
+
+
+<div class="panel-subtitle">
+
+PACKET FLOW AND THREAT VISUALIZATION
+
+</div>
+
+
+</div>
+
+
+
+<div class="panel-content topology-container">
+
+
+<div id="topology-graph"></div>
+
+
+</div>
+
+
+</section>
+
+
+
+
+
+
+
+<div class="control-sidebar">
+
+
+
+<section class="panel control-panel">
+
+
+<div class="panel-header">
+
+
+<div class="panel-title">
+
+ATTACK TESTING PANEL
+
+</div>
+
+
+</div>
+
+
+
+<div class="panel-content">
+
+
+<p class="panel-description">
+
+Test network traffic and check anomaly detection results.
+
+<br><br>
+
+<b>
+Machine Learning Model:
+</b>
+
+Isolation Forest
+
+<br>
+
+<b>
+Input Features:
+</b>
+
+Packet Size, Duration, Ports, Connection Count
+
+</p>
+
+
+
+
+
+<div class="button-group">
+
+
+<button id="trigger-ddos" class="attack-btn ddos">
+
+DDOS TEST
+
+</button>
+
+
+
+
+<button id="trigger-scan" class="attack-btn scan">
+
+PORT SCAN TEST
+
+</button>
+
+
+
+
+<button id="trigger-exfil" class="attack-btn exfil">
+
+DATA EXFIL TEST
+
+</button>
+
+
+
+</div>
+
+
+</div>
+
+
+</section>
+
+
+
+
+
+
+
+
+<section class="panel ticker-panel">
+
+
+<div class="panel-header">
+
+
+<div class="panel-title">
+
+NETWORK EVENT LOG
+
+</div>
+
+
+</div>
+
+
+
+<div id="ticker-feed" class="ticker-content">
+
+
+<div class="ticker-entry system-msg">
+
+SYSTEM STARTED. WAITING FOR NETWORK DATA...
+
+</div>
+
+
+</div>
+
+
+
+</section>
+
+
+
+</div>
+
+
+</div>
+
+
+
+
+
+
+
+
+
+<section class="panel logs-panel">
+
+
+<div class="panel-header">
+
+
+<div class="panel-title">
+
+SECURITY ALERT LOGS
+
+</div>
+
+
+</div>
+
+
+
+
+
+<div class="logs-table-container">
+
+
+<table class="logs-table">
+
+
+<thead>
+
+
+<tr>
+
+<th>TIME</th>
+
+<th>SOURCE</th>
+
+<th>DESTINATION</th>
+
+<th>PROTOCOL</th>
+
+<th>SIZE</th>
+
+<th>STATUS</th>
+
+<th>RISK</th>
+
+</tr>
+
+
+</thead>
+
+
+
+
+<tbody id="logs-body">
+
+
+<tr>
+
+<td colspan="7">
+
+Waiting for events...
+
+</td>
+
+
+</tr>
+
+
+</tbody>
+
+
+</table>
+
+
+</div>
+
+
+
+</section>
+
+
+
+
+</main>
+
+
+
+
+
+<script src="script.js?v=3"></script>
+
+
+</body>
+</html>
